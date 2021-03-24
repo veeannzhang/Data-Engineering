@@ -6,13 +6,20 @@ from sql_queries import *
 
 
 def process_song_file(cur, filepath):
+    """
+    This function process song files and extract the information into song_data and artist_data, and insert the values into the song table and artist table.
+
+    INPUTS:
+    * cur: the cursor variable that connects to the database
+    * filepath: the file path of the song files 
+    """
     # open song file
     df = pd.read_json(filepath, lines=True)
 
     # insert song record
     song_data = df[['song_id', 'title', 'artist_id', 'year', 'duration']].values[0].tolist()
     cur.execute(song_table_insert, song_data)
-    
+
     # insert artist record
     artist_data = df[['artist_id', 'artist_name', 'artist_location', 'artist_latitude', 'artist_longitude']].values[0].tolist()
     cur.execute(artist_table_insert, artist_data)
@@ -27,12 +34,12 @@ def process_log_file(cur, filepath):
 
     # convert timestamp column to datetime
     t = pd.to_datetime(df['ts'],  unit='ms')
-    
+
     # insert time data records
     time_data = [df['ts'], t.dt.hour, t.dt.day, t.dt.week, t.dt.month, t.dt.year, t.dt.weekday]
     column_labels = ['start_time', 'hour', 'day', 'week', 'month', 'year', 'weekday']
     time_df = pd.DataFrame(dict(zip(column_labels, time_data)))
-    
+
 
     for i, row in time_df.iterrows():
         cur.execute(time_table_insert, list(row))
@@ -46,11 +53,11 @@ def process_log_file(cur, filepath):
 
     # insert songplay records
     for index, row in df.iterrows():
-        
+
         # get songid and artistid from song and artist tables
         cur.execute(song_select, (row.song, row.artist, row.length))
         results = cur.fetchone()
-        
+
         if results:
             songid, artistid = results
         else:
