@@ -11,7 +11,7 @@ def process_song_file(cur, filepath):
 
     INPUTS:
     * cur: the cursor variable that connects to the database
-    * filepath: the file path of the song files 
+    * filepath: the file path of the song files
     """
     # open song file
     df = pd.read_json(filepath, lines=True)
@@ -64,7 +64,7 @@ def process_log_file(cur, filepath):
             songid, artistid = None, None
 
         # insert songplay record
-        songplay_data = [row.ts, row.userId, row.level, songid, artistid, row.sessionId, row.location, row.userAgent]
+        songplay_data = [pd.to_datetime(row.ts, unit='ms'), row.userId, row.level, songid, artistid, row.sessionId, row.location, row.userAgent]
         cur.execute(songplay_table_insert, songplay_data)
 
 
